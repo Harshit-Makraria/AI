@@ -1,4 +1,5 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-const genAI = new GoogleGenerativeAI('AIzaSyBij2R2KnCNjJ9SNNUgRWtTA67Lf5CIdro');
-export const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+const google = createGoogleGenerativeAI({
+    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY as string,
+  });
+export const model = google( "gemini-2.0-flash" );

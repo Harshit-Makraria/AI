@@ -12,11 +12,43 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
+
 model User {
-  id       String   @id @default(cuid()) @map("_id") 
+ id       String @id @default(auto()) @map("_id") @db.ObjectId
+  userId   String   @unique @map("userId") @default(cuid())
   email    String   @unique
   name     String?
   password String
-  hashedPassword String?
+  chats    ChatUser[]
+  messages Message[]
+  createdAt DateTime @default(now())
+
+}
+
+model Chat {
+  id       String      @id @default(uuid()) @map("_id") @db.ObjectId
+  name      String?
+  isGroup   Boolean     @default(false)
+  users     ChatUser[]
+  messages  Message[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model ChatUser {
+  id       String   @id @default(uuid()) @map("_id") @db.ObjectId
+  userId   String   @db.ObjectId
+  chatId   String   @db.ObjectId
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chat     Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id        String   @id @default(uuid()) @map("_id") @db.ObjectId
+  text      String
+  senderId  String   @db.ObjectId
+  chatId    String   @db.ObjectId
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }

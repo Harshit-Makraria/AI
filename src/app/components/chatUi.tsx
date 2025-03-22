@@ -5,24 +5,55 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 export default function ChatUI() {
-  const [tokenUsage, setTokenUsage] = useState<{ promptTokens: number; responseTokens: number; totalTokens: number } | null>(null);
+  // const [tokenUsage, setTokenUsage] = useState<{
+  //   promptTokens: number;
+  //   responseTokens: number;
+  //   totalTokens: number;
+  // } | null>(null);
+
   const [typingMessage, setTypingMessage] = useState("");
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
-
   const { messages, input, handleInputChange, handleSubmit, setMessages } = useChat({
-    api: "/api/chat",
-    onResponse: (res) => {
-      res.json().then((data) => {
-        if (data.content) {
-          simulateTypingEffect(data.content);
+    api: "/api/chut",
+    onResponse: async (res) => {
+      const reader = res.body?.getReader();
+      if (!reader) return;
+    
+      const decoder = new TextDecoder();
+      let fullResponse = "";
+    
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+    
+        fullResponse += decoder.decode(value);
+      }
+    
+      // Attempt to extract the relevant message dynamically
+      let extractedMessage = "";
+      const lines = fullResponse.split("\n");
+    
+      for (const line of lines) {
+        const match = line.match(/0:"(.*?)"/); // Extract text inside 0:"..."
+        if (match) {
+          extractedMessage += match[1]; // Append the matched text
         }
-        if (data.tokenUsage) {
-          setTokenUsage(data.tokenUsage);
-        }
-      });
+      }
+    
+      extractedMessage = extractedMessage.replace(/\\n/g, "").trim(); // Remove extra spaces
+    
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now().toString(), role: "assistant", content: extractedMessage || fullResponse.trim() },
+      ]);
+    
+      setTypingMessage(""); // Clear typing animation
     },
-  });
-
+    
+      // ✅ Ensure JSON parsing only when response is valid JSON
+      
+    
+}); 
   // Scroll to bottom when messages update
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -30,26 +61,8 @@ export default function ChatUI() {
     }
   }, [messages, typingMessage]);
 
-  // Typing effect simulation
-  const simulateTypingEffect = (text: string) => {
-    setTypingMessage("");
-    let index = 0;
-    const interval = setInterval(() => {
-      setTypingMessage((prev) => prev + text[index]);
-      index++;
-      if (index === text.length) {
-        clearInterval(interval);
-        setMessages((prev) => [
-          ...prev,
-          { id: Date.now().toString(), role: "assistant", content: text },
-        ]);
-        setTypingMessage("");
-      }
-    }, 50); // Adjust typing speed here
-  };
-
   return (
-    <div className="flex flex-col items-center p-4 w-full max-w-2xl mx-auto  bg-gray-900 text-white">
+    <div className="flex flex-col items-center p-4 w-full max-w-2xl mx-auto bg-gray-900 text-white">
       {/* Header */}
       <h1 className="text-2xl font-bold mb-4 text-center">🤖 AI Chat Assistant</h1>
 

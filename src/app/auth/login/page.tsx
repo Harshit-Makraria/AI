@@ -30,9 +30,9 @@ export default function LoginPage() {
       setError("Invalid email or password");
       return;
     }
-  
-    console.log("Login successful!");
     router.push("/");
+    console.log("Login successful!");
+    
   };
   
 
@@ -54,7 +54,7 @@ export default function LoginPage() {
           </button>
         </form>
         <p className="mt-4 text-center">
-          Don't have an account? 
+          Don`&apos`t have an account? 
           <span onClick={() => router.push("/auth/signup")} className="text-blue-500 hover:underline cursor-pointer">
             Sign up
           </span>

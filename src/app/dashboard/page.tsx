@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
+// import { signIn, signOut, useSession } from "next-auth/react";
 import ChatUI from "../components/chatUi";  
 interface User {
   id: string;

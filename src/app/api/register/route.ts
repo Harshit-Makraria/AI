@@ -2,7 +2,7 @@
 
 export const runtime = "nodejs"; // Ensure Node.js runtime
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
+// import bcrypt from "bcrypt";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // const hashedPassword = await bcrypt.hash(password, 10);
     console.log("Password hashed.");
 
     // Create user in the database
@@ -37,8 +37,9 @@ export async function POST(req: NextRequest) {
     console.log("User created:", newUser);
 
     return NextResponse.json({ message: "User registered successfully", user: newUser });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating user:", error);
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
